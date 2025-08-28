@@ -78,6 +78,11 @@ class ExpiryReturnReportController extends Controller
                 
                 $billNo = $voucher->bill_no;
                 
+                // Skip if bill_no is empty or null
+                if (empty($billNo)) {
+                    continue;
+                }
+                
                 if (!isset($groupedBills[$billNo])) {
                     $groupedBills[$billNo] = [
                         'bill_no' => $billNo,
@@ -88,15 +93,15 @@ class ExpiryReturnReportController extends Controller
                     ];
                 }
                 
-                $productValue = $voucher->ret_quantity * $voucher->purchase_price;
+                $productValue = ($voucher->ret_quantity ?? 0) * ($voucher->purchase_price ?? 0);
                 
                 $groupedBills[$billNo]['products'][] = [
                     'id' => $voucher->id,
                     'product_name' => $voucher->product_name,
                     'batch_no' => $voucher->batch_no,
                     'expiry_date' => Carbon::parse($voucher->exp_date)->format('d-m-Y'),
-                    'qty' => $voucher->ret_quantity,
-                    'purchase_price' => $voucher->purchase_price,
+                    'qty' => $voucher->ret_quantity ?? 0,
+                    'purchase_price' => $voucher->purchase_price ?? 0,
                     'total_value' => $productValue
                 ];
                 
@@ -104,6 +109,11 @@ class ExpiryReturnReportController extends Controller
                 $groupedBills[$billNo]['total_value'] += $productValue;
                 $totalProducts++;
             }
+            
+            // Remove bills with zero total value
+            $groupedBills = array_filter($groupedBills, function($bill) {
+                return $bill['total_value'] > 0;
+            });
 
             return response()->json([
                 'success' => true,

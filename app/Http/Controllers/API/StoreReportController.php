@@ -17,6 +17,7 @@ use App\Models\Stock;
 use App\Models\ActivityLog;
 use App\Models\Banks;
 use App\Models\Profiler;
+use App\Models\SubTransaction;
 
 
 use App\Models\ReturnVouchers;
@@ -1169,10 +1170,13 @@ class StoreReportController extends Controller
 		error_log("The total data is ".json_decode($request->totalAmount));
 
 		$rList = json_decode($request->returnList);
+		$counterEntry = json_decode($request->counterEntry);
+		
 
 		//$returnList = $request->returnList;
 		$supplierID = json_decode($request->supplierID);
 		$totalAmount = json_decode($request->totalAmount);
+
 
 	// 	   'supplier_id',
     //     'voucher_number',
@@ -1218,9 +1222,34 @@ class StoreReportController extends Controller
                         'total' => $r->subTotal
 					]);
 
+
+
 				$returnVoucher->save();
 
 			}
+
+            // new code copy here 
+			 $transaction = new Transaction([
+                    'narration'         => 'expiry return',
+                    'generated_source'  =>'online',
+                    'branch_id'         => Auth::user()->branch_id,
+                ]);
+                
+                $transaction->save();
+
+                foreach($counterEntry as $item)
+                {
+                    $subTransaction = new SubTransaction([
+                        'transaction_id'     => $transaction->id,
+                        'account_id'     	 => $item->accountID,
+                        'account_name'	 	 => $item->accountHead,
+                        'amount'      	     => $item->amount,
+                        'type'      		 => $item->type,
+                    ]);
+                    
+                    $subTransaction->save();
+
+                }
 			
 			  $response = response()->json([
                     'alert' =>'info',

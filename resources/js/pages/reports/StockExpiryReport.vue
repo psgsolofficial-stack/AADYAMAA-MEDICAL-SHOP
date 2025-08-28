@@ -77,9 +77,18 @@
                     <Column field="batchNo" header="Batch No"></Column>
                     <Column field="totalUnit" header="Total Unit"></Column>
 
-                    <Column  field="tax3" header="Return Qty">
-                        <template #editor="{ data, field }">
-                            <InputText v-model="data[field]" autofocus fluid />
+                    <Column field="tax3" header="Return Qty">
+                        <template #body="{ data }">
+                            <input 
+                                type="number" 
+                                v-model="data.tax3" 
+                                class="form-control" 
+                                style="width: 80px;"
+                                min="0"
+                                :max="data.totalUnit"
+                                @input="handleReturnQtyChange(data, $event)"
+                                :disabled="!isProductSelected(data)"
+                            />
                         </template>
                     </Column>
                     <Column field="purchasePrice" header="Purchase Price"></Column>
@@ -107,6 +116,13 @@
        
 
   <div id="invoiceArea" style="display: block;">
+    <!-- Header Section -->
+    <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+      <h2 style="margin: 0; color: #333;">Return Voucher</h2>
+      <h3 style="margin: 5px 0; color: #666;">Supplier: {{ searchFilters.customerName }}</h3>
+      <p style="margin: 5px 0; font-size: 14px;">Date: {{ getCurrentFormattedDate() }}</p>
+    </div>
+    
     <table style="width: 100%; border: 2px;">
       <thead style="background-color: lightblue;">
         <tr>
@@ -267,6 +283,13 @@ interface IReport {
     
 }
 
+interface CounterEntry {
+  accountID: number;
+  accountHead: string;
+  amount: number;
+  type: string;
+}
+
 @Options({
     title: 'Stock Expiry Report',
     components: {AutoComplete},
@@ -305,6 +328,10 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
     private submitted = false;
     private filterBranch = [];
     private selectedProducts =[];
+    private counterEntry: CounterEntry[] = [];
+
+    // private counterEntry = [];
+
 
 
 
@@ -359,19 +386,24 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
         let returnList = this.selectedProducts;
         let supplierID =this.searchFilters.customerID;
         let total = this.getRetTotal();
-        alert('Total to return: '+total);
+        // alert('Total to return: '+total);
         console.log("Return List: "+returnList);
-
+        this.counterEntry.push({
+            accountID: 2,
+            accountHead: 'Expiry Return',
+            amount: total,
+            type: "Debit",
+          });
         //call to save the return voucher
-       this.reportService.saveReturnVoucher(null, supplierID, total, returnList).then((res) => {
+       this.reportService.saveReturnVoucher(null, supplierID, total, returnList, this.counterEntry).then((res) => {
             //const data = this.camelizeKeys(res);
             //console.log("Return Voucher No: "+data.rno);
             
 
             //print the voucher
-            // var a = window.open('', '', 'height=500, width=500');
-           //  a?.document.write(document.getElementById('invoiceArea')?.innerHTML);
-           // a?.print();
+            var a = window.open('', '', 'height=500, width=500');
+            a?.document.write(document.getElementById('invoiceArea')?.innerHTML);
+           a?.print();
           
             });
         
@@ -382,22 +414,54 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
      onCellEditComplete = (event) => {
         
         let { data, newValue, field, index } = event;
+        
+        // Check if this is Return Qty field
+        if (field === 'tax3') {
+            // Check if this product is selected (checkbox checked)
+            const isProductSelected = this.selectedProducts.some(selected => 
+                selected.id === data.id || 
+                (selected.batchNo === data.batchNo && selected.productName === data.productName)
+            );
+            
+            if (!isProductSelected) {
+                // Product not selected, don't allow editing Return Qty
+                this.$toast.error('Please select the product first to enter return quantity');
+                data[field] = 0; // Reset to 0
+                return;
+            }
+            
+            // Validate return quantity doesn't exceed total units
+            if (newValue > data.totalUnit) {
+                this.$toast.error('Return quantity cannot exceed total units');
+                data[field] = data.totalUnit;
+                newValue = data.totalUnit;
+            }
+        }
+        
         console.log("Data is "+JSON.stringify(data));
         console.log("new value "+newValue);
-       // alert(field);
         data[field]=newValue;
-       // alert(newValue);
+        
+        // Update selected products if this product is selected
+        const selectedIndex = this.selectedProducts.findIndex(selected => 
+            selected.id === data.id || 
+            (selected.batchNo === data.batchNo && selected.productName === data.productName)
+        );
+        
+        if (selectedIndex !== -1) {
+            this.selectedProducts[selectedIndex][field] = newValue;
+            
+            // Recalculate total if needed
+            if (field === 'tax3') {
+                let pp = this.selectedProducts[selectedIndex]['purchasePrice'] || 0;
+                let qty = newValue;
+                let tax = this.selectedProducts[selectedIndex]['tax1'] || 0;
+                let totalPrice = (pp * qty) * ((100 + 2 * tax) / 100);
+                this.selectedProducts[selectedIndex]['subTotal'] = Math.round(totalPrice);
+            }
+        }
+        
         this.rList[index][field] = newValue;
-        this.selectedProducts[index][field] = newValue;
-        console.log("PP: "+this.selectedProducts[index]['purchasePrice']);
-        let pp = this.selectedProducts[index]['purchasePrice'];
-        let qty = this.selectedProducts[index]['tax3']
-        let tax = this.selectedProducts[index]['tax1'];
-        let  totalPrice = (pp*qty)*( (100+2*tax)/100 );
-        this.selectedProducts[index]['subTotal']=totalPrice;
-        this.rList[index]['subTotal']=parseFloat(totalPrice).toFixed(2);
-
-  
 }
 
     get rList() {
@@ -425,6 +489,62 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
     this.searchFilters.customerID = profileInfo.id;
   }
 
+
+   isProductSelected(data) {
+        return this.selectedProducts.some(selected => 
+            selected.id === data.id || selected.batchNo === data.batchNo
+        );
+    }
+
+    handleReturnQtyChange(data, event) {
+        const value = Number(event.target.value);
+        
+        // Instant validation - Check if exceeds total units
+        if (value > data.totalUnit) {
+            // Show error popup
+            alert(`Return quantity not acceptable! Total unit is ${data.totalUnit}, you entered ${value}`);
+            
+            // Reset to maximum allowed value
+            data.tax3 = data.totalUnit;
+            event.target.value = data.totalUnit;
+            
+            // Force focus back to input to show the corrected value
+            setTimeout(() => {
+                event.target.focus();
+                event.target.select();
+            }, 100);
+            
+            return;
+        }
+        
+        // If value is valid, update the data
+        data.tax3 = value;
+        
+        // Update selected products array
+        const selectedIndex = this.selectedProducts.findIndex(selected => 
+            selected.id === data.id || selected.batchNo === data.batchNo
+        );
+        
+        if (selectedIndex !== -1) {
+            this.selectedProducts[selectedIndex].tax3 = value;
+            
+            // Recalculate and round the subTotal
+            let pp = this.selectedProducts[selectedIndex]['purchasePrice'] || 0;
+            let tax = this.selectedProducts[selectedIndex]['tax1'] || 0;
+            let totalPrice = (pp * value) * ((100 + 2 * tax) / 100);
+            this.selectedProducts[selectedIndex]['subTotal'] = Math.round(totalPrice);
+        }
+    }
+
+   getCurrentFormattedDate() {
+        const now = new Date();
+        const day = now.getDate();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        
+        return `${day}${month}-${year}`;
+    }
 
    getRetTotal(){
     let total =0;

@@ -138,7 +138,7 @@ export default class Report extends mixins(UtilityOptions) {
     },
     {
       label: "Expiry Return Report",
-      image: require("@/assets/menu-icons/reports/expiry.png").default,
+      image: require("@/assets/menu-icons/reports/sales_refund_report.png").default,
       to: "/store/exp-return-report",
       description:"",
     }

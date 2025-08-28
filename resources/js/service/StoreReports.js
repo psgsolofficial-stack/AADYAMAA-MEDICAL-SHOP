@@ -120,7 +120,7 @@ export default class StoreReports {
 	}
 
 	//sam
-	saveReturnVoucher(postObj, supplierID, total, returnList){
+	saveReturnVoucher(postObj, supplierID, total, returnList, counterEntry){
 
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
@@ -129,6 +129,10 @@ export default class StoreReports {
 
 		const formData = new FormData();
 		formData.append('returnList', JSON.stringify(returnList));
+		formData.append('counterEntry', JSON.stringify(counterEntry));
+
+
+
 		formData.append('totalAmount', total);
 		formData.append('supplierID', supplierID);
 		//alert('form data is '+formData);

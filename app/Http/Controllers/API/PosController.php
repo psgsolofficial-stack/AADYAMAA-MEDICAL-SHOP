@@ -255,6 +255,8 @@ class PosController extends Controller
 
                 }
 
+                
+
                 //create a profile
                 if($request->patient_details !=null){
                     $item = new Profiler([
