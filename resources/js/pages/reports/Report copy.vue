@@ -100,12 +100,7 @@ export default class Report extends mixins(UtilityOptions) {
       to: "/store/tax-report",
       description:"",
     },
-    {
-      label: "Bank Reconciliation",
-      image: require("@/assets/menu-icons/reports/bank.png").default,
-      to: "/store/bank-reconciliation",
-      description:"",
-    },
+   
     {
       label: "Account Statement",
       image: require("@/assets/menu-icons/reports/account_statement.png").default,
@@ -132,16 +127,17 @@ export default class Report extends mixins(UtilityOptions) {
     // },
     {
       label: "Stock Expiry Report",
-      image: require("@/assets/menu-icons/reports/  2.png").default,
+      image: require("@/assets/menu-icons/reports/expiry.png").default,
       to: "/store/expiry-report",
       description:"",
     },
-    {
-      label: "Expiry Return Report",
-      image: require("@/assets/menu-icons/reports/sales_refund_report.png").default,
+     {
+      label: "Bank Reconciliation",
+      image: require("@/assets/menu-icons/reports/bank.png").default,
       to: "/store/exp-return-report",
       description:"",
     }
+   
   ];
 }
 </script>
