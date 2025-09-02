@@ -118,7 +118,8 @@
   <div id="invoiceArea" style="display: block;">
     <!-- Header Section -->
     <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
-      <h2 style="margin: 0; color: #333;">Return Voucher</h2>
+      <h1 style="margin: 0; color: #333; font-size: 24px;">Aadyamaa Medical Shop</h1>
+      <h2 style="margin: 10px 0 0 0; color: #333;">Expiry Return Voucher</h2>
       <h3 style="margin: 5px 0; color: #666;">Supplier: {{ searchFilters.customerName }}</h3>
       <p style="margin: 5px 0; font-size: 14px;">Date: {{ getCurrentFormattedDate() }}</p>
     </div>
