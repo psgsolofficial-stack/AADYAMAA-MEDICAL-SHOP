@@ -21,6 +21,7 @@ export default class PosService {
 		})
 	}
 
+	//this is soumik code - modified to search unique items first
 	searchItem(keyword) {
 		//SHOW LOADING
 		const store = useStore();
@@ -28,6 +29,29 @@ export default class PosService {
 		const api = '/api/search_items';
 		const formData = new FormData();
 		formData.append('keyword', keyword);
+
+		return instance()(
+			{
+				method: 'post',
+				url: api,
+				data: formData,
+			}
+		).then(res => res.data)
+			.catch((e) => ExceptionHandling.HandleErrors(e))
+			.finally(() => {
+				store.dispatch(ActionTypes.PROGRESS_BAR, false);
+			})
+	}
+
+	//this is soumik code - new method to get product variations by base product name
+	getProductVariations(baseProductName, generic) {
+		//SHOW LOADING
+		const store = useStore();
+		store.dispatch(ActionTypes.PROGRESS_BAR, true);
+		const api = '/api/get_product_variations';
+		const formData = new FormData();
+		formData.append('base_product_name', baseProductName);
+		formData.append('generic', generic);
 
 		return instance()(
 			{

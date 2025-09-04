@@ -1,5 +1,3 @@
-
-
 <template>
     <section>
         <div class="app-container">
@@ -36,17 +34,7 @@
             <div class="p-mt-2" >
 
 
-<template>
-    <div class="card">
-        <DataTable v-model:selection="selectedProducts" :value="rList" dataKey="id" tableStyle="min-width: 50rem">
-            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="code" header="Code"></Column>
-            <Column field="name" header="Name"></Column>
-            <Column field="category" header="Category"></Column>
-            <Column field="quantity" header="Quantity"></Column>
-        </DataTable>
-    </div>
-</template>
+
 
 
                 
@@ -75,7 +63,7 @@
                     <Column field="billNo" header="Bill No"> </Column>
                     <Column field="expiryDate" header="Expiry Date"></Column>
                     <Column field="batchNo" header="Batch No"></Column>
-                    <Column field="totalUnit" header="Total Unit"></Column>
+                    <Column field="qty" header="Total Exp. Unit"></Column>
 
                     <Column field="tax3" header="Return Qty">
                         <template #body="{ data }">
@@ -382,7 +370,7 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
     //used to create return voucher
     returnVoucher(){
         console.log('type of selectedProducts: '+typeof this.selectedProducts);
-        alert('returning items '+JSON.stringify(this.selectedProducts));
+        //alert('returning items '+JSON.stringify(this.selectedProducts));
         //document.getElementById("billNo").textContent=res.rno;
         let returnList = this.selectedProducts;
         let supplierID =this.searchFilters.customerID;
@@ -415,6 +403,7 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
      onCellEditComplete = (event) => {
         
         let { data, newValue, field, index } = event;
+        console.log("Data is "+JSON.stringify(data));
         
         // Check if this is Return Qty field
         if (field === 'tax3') {
@@ -426,20 +415,19 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
             
             if (!isProductSelected) {
                 // Product not selected, don't allow editing Return Qty
-                this.$toast.error('Please select the product first to enter return quantity');
+                alert('Please select the product first to enter return quantity');
                 data[field] = 0; // Reset to 0
                 return;
             }
-            
+            //alert(data.qty+'...'+newValue);
             // Validate return quantity doesn't exceed total units
-            if (newValue > data.totalUnit) {
-                this.$toast.error('Return quantity cannot exceed total units');
-                data[field] = data.totalUnit;
-                newValue = data.totalUnit;
+            if (newValue > data.qty) {
+                alert('Return quantity cannot exceed total units');
+                 data[field] = 0;
+                 newValue = 0;
             }
         }
         
-        console.log("Data is "+JSON.stringify(data));
         console.log("new value "+newValue);
         data[field]=newValue;
         

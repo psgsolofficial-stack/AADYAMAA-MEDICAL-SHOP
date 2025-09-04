@@ -211,6 +211,8 @@ Route::post('update_stock', [StockController::class, 'update'])->middleware(['au
 
 //POS
 Route::post('search_items', [StockController::class, 'searchItems'])->middleware('auth:sanctum');
+//this is soumik code - new route for getting product variations
+ Route::post('get_product_variations', [StockController::class, 'getProductVariations'])->middleware('auth:sanctum');
 Route::get('pos_initialization', [PosController::class, 'index'])->middleware(['auth:sanctum','permission:Orders']);
 Route::post('save_pos_receipt', [PosController::class, 'saveReceipt'])->middleware(['auth:sanctum','permission:Orders']);
 Route::post('search_pos_receipt', [PosController::class, 'searchReceipt'])->middleware('auth:sanctum');

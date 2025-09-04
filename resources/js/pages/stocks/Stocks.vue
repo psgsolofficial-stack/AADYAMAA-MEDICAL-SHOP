@@ -159,6 +159,11 @@
                 {{slotProps.data.item_location}}
             </template>
           </Column>
+          <Column header="Supplier Name" >
+            <template #body="slotProps">
+                {{slotProps.data.supplier_name || 'N/A'}}
+            </template>
+          </Column>
           
         </DataTable>
       </div>

@@ -143,6 +143,7 @@ const routes = [
        { path: 'stock-alert-report', name: 'Stock Alert Report', component: StockAlertReport },
        { path: 'activity-report', name: 'Activity Report', component: ActivityReport },
        { path: 'expiry-report', name: 'Stock Expiry Report', component: StockExpiryReport },
+       { path: 'expiry_report', name: 'Stock Expiry Report', component: StockExpiryReport },
        { path: 'exp-return-report', name: 'Expiry Return Report', component: ExpiryReturnReport },
     ]
   }

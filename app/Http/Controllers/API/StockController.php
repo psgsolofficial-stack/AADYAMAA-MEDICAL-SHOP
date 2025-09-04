@@ -72,6 +72,7 @@ class StockController extends Controller
 		}
 		$keyword = str_replace(' ','', $keyword);
 
+		// First get stocks without supplier info
 		$stocks = DB::table('stocks')
 			->where(function ($query) use ($keyword) {
 				$query
@@ -86,8 +87,25 @@ class StockController extends Controller
 			->select('stocks.*')
 			->limit(20)
 			->offset($request->start)
-			->orderBy('id', 'DESC')
+			->orderBy('stocks.id', 'DESC')
 			->get();
+
+		// Add supplier info to each stock item
+		foreach ($stocks as $stock) {
+			$supplier = DB::table('pos_sub_receipts as psr')
+				->leftJoin('pos_receipts as pr', 'psr.pos_receipt_id', '=', 'pr.id')
+				->leftJoin('profilers as p', 'pr.profile_id', '=', 'p.id')
+				->where('psr.stock_id', $stock->id)
+				->select('p.account_title as supplier_name')
+				->first();
+			
+			$stock->supplier_name = $supplier ? $supplier->supplier_name : null;
+		}
+			//this is soumik code
+			//$stocks = DB::table('stocks')
+			//error_log('Sotcks returned >>>>')
+		    // $stocks[0]->supplier='ABCD';
+		   error_log($stocks);
 
 		$totalRecords = DB::table('stocks')
 			->where(function ($query) use ($keyword) {
@@ -127,6 +145,9 @@ class StockController extends Controller
 			->where('id', Auth::user()->branch_id)
 			->get();
 
+			//now get supplier name for all the stock items
+
+
 		return [
 			'stores' => $stores,
 			'records' => $stocks,
@@ -139,6 +160,18 @@ class StockController extends Controller
 			'brandSector' => $brandSector,
 			'category' => $category
 		];
+	}
+
+	public function getSupplierName($stocks){
+
+		foreach($stocks as $s){
+			//$expirySQL=	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date), s.qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM `pos_sub_receipts` psr, pos_receipts pr, profilers p, stocks s WHERE psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id and pr.profile_id=$supplier order by psr.expiry_date DESC;";
+			
+			// DB::select('SELECT psr.batch_no,psr.stock_id,psr.created_at, pr.profile_id FROM pos_sub_receipts psr, pos_receipts pr where  pr.bill_no='$billNo' and psr.pos_receipt_id=pr.id;')
+
+		}
+
+		
 	}
 
 
@@ -480,44 +513,38 @@ class StockController extends Controller
 		return response()->json($stocks);
 	}
 
+	//this is soumik code - modified search to show unique base product names only
 	public function searchItems(Request $request)
 	{
 		$keyword = $request['keyword'];
 
 		//replace all the white spaces from the search word
-		 $keyword = str_replace(' ','', $keyword);
+		$keyword = str_replace(' ','', $keyword);
 		error_log("KEYWORD AFTER REMOVING SPACES>>>>>".$keyword);
 
-
+		//this is soumik code - extract base product name by removing numbers and special chars
 		$stocks = DB::table('stocks')
-			->join('option_tags as brand', 'brand.id', '=', 'stocks.brand')
-			->join('option_tags as brand_sector', 'brand_sector.id', '=', 'stocks.brand_sector')
-			->join('option_tags as category', 'category.id', '=', 'stocks.category')
-			->join('option_tags as type', 'type.id', '=', 'stocks.type')
-			// ->whereRaw("REPLACE('stocks.product_name',' ','')")
-
-
+			->leftJoin('option_tags as brand', 'brand.id', '=', 'stocks.brand')
+			->leftJoin('option_tags as category', 'category.id', '=', 'stocks.category')
 			->where('stocks.branch_id', Auth::user()->branch_id)
+			->where('stocks.status', 'Active')
 			->where(function ($query) use ($keyword) {
-				$query->whereRaw("REGEXP_REPLACE(stocks.product_name,'[^A-Za-z0-9]','') LIKE '$keyword%' ")
-					// ->Where('stocks.qty','>',0)
-					->orWhere('stocks.generic', 'LIKE', '%' . $keyword . '%')
-					->orWhere('stocks.batch_no', '=', $keyword)
-					->orWhere('stocks.barcode', '=', $keyword);
-					
+				$query->where('stocks.product_name', 'LIKE', $keyword . '%')
+					->orWhere('stocks.generic', 'LIKE', $keyword . '%')
+					->orWhere('stocks.barcode', 'LIKE', $keyword . '%');
 			})
 			->select(
-				'stocks.*',
-				'stocks.product_name',
+				DB::raw('TRIM(REGEXP_REPLACE(stocks.product_name, "[0-9]+", "")) as base_product_name'),
 				'stocks.generic',
-				'stocks.description',
 				'brand.option_name as bName',
-				'brand_sector.option_name as bSector',
 				'category.option_name as cName',
-				'type.option_name as pType',
+				DB::raw('COUNT(*) as variation_count'),
+				DB::raw('MIN(stocks.id) as sample_id'),
+				DB::raw('MIN(stocks.product_name) as product_name')
 			)
+			->groupBy(DB::raw('TRIM(REGEXP_REPLACE(stocks.product_name, "[0-9]+", ""))'), 'stocks.generic', 'brand.option_name', 'category.option_name')
 			->limit(20)
-			->orderBy('product_name', 'ASC')
+			->orderBy('base_product_name', 'ASC')
 			->get();
 
 		return [
@@ -525,5 +552,47 @@ class StockController extends Controller
 		];
 	}
 
+	//this is soumik code - new method to get all variations of a base product
+	public function getProductVariations(Request $request)
+	{
+		$baseProductName = $request['base_product_name'];
+		$generic = $request['generic'];
+
+		//this is soumik code - debug log to see what we're getting
+		error_log("BASE PRODUCT NAME: " . $baseProductName);
+		error_log("GENERIC: " . $generic);
+
+		//this is soumik code - simplified query with left joins
+		$query = DB::table('stocks')
+			->leftJoin('option_tags as brand', 'brand.id', '=', 'stocks.brand')
+			->leftJoin('option_tags as brand_sector', 'brand_sector.id', '=', 'stocks.brand_sector')
+			->leftJoin('option_tags as category', 'category.id', '=', 'stocks.category')
+			->leftJoin('option_tags as type', 'type.id', '=', 'stocks.type')
+			->where('stocks.branch_id', Auth::user()->branch_id)
+			->where('stocks.status', 'Active')
+			->where('stocks.product_name', 'LIKE', '%' . $baseProductName . '%');
+
+		//this is soumik code - only add generic condition if it's not empty
+		if (!empty($generic)) {
+			$query->where('stocks.generic', 'LIKE', '%' . $generic . '%');
+		}
+
+		$stocks = $query->select(
+				'stocks.*',
+				'brand.option_name as bName',
+				'brand_sector.option_name as bSector',
+				'category.option_name as cName',
+				'type.option_name as pType'
+			)
+			->orderBy('stocks.product_name', 'ASC')
+			->get();
+
+		//this is soumik code - debug log to see results
+		error_log("VARIATIONS FOUND: " . count($stocks));
+
+		return [
+			'records' => $stocks
+		];
+	}
 
 }

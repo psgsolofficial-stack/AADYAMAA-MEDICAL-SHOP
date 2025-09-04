@@ -1,9 +1,11 @@
+<!-- @format -->
+
 <template>
   <div class="app-container">
-      <div class="jumbotron p-1 text-center mb-0"  >
-        <h5> <i class="pi pi-chart-bar" ></i> Store Reports</h5>
-        <h6 class="font-weight-bold">Get the complete reporting of store.</h6>
-      </div>
+    <div class="jumbotron p-1 text-center mb-0">
+      <h5><i class="pi pi-chart-bar"></i> Store Reports</h5>
+      <h6 class="font-weight-bold">Get the complete reporting of store.</h6>
+    </div>
     <section class="section-menu">
       <div class="col-md-12">
         <div class="row">
@@ -31,10 +33,9 @@ import { Options, mixins } from "vue-class-component";
 import UtilityOptions from "../../mixins/UtilityOptions";
 
 @Options({
-  title: 'Report',
+  title: "Report",
   components: {},
 })
-
 export default class Report extends mixins(UtilityOptions) {
   private home = { icon: "pi pi-home", to: "/" };
   private items = [{ label: "Report" }];
@@ -43,87 +44,89 @@ export default class Report extends mixins(UtilityOptions) {
       label: "User Report",
       image: require("@/assets/menu-icons/reports/user_report.png").default,
       to: "/store/user-report",
-      description:"",
+      description: "",
     },
     {
       label: "Sales/Refund Report",
-      image: require("@/assets/menu-icons/reports/sales_refund_report.png").default,
+      image: require("@/assets/menu-icons/reports/sales_refund_report.png")
+        .default,
       to: "/store/sales-refund-reports",
-      description:"",
+      description: "",
     },
     {
       label: "Challan Report",
       image: require("@/assets/menu-icons/reports/stock_transfer.png").default,
       to: "/store/transfer-reports",
-      description:"",
+      description: "",
     },
     {
       label: "Purchasing Report",
       image: require("@/assets/menu-icons/reports/purchasing.png").default,
       to: "/store/purchasing-report",
-      description:"",
+      description: "",
     },
-   
+
     {
       label: "Performance Report",
       image: require("@/assets/menu-icons/reports/performance.png").default,
       to: "/store/performance-report",
-      description:"",
+      description: "",
     },
     {
       label: "General Journal",
       image: require("@/assets/menu-icons/reports/general.png").default,
       to: "/store/general-journal-report",
-      description:"",
+      description: "",
     },
     {
       label: "Income Statement",
       image: require("@/assets/menu-icons/reports/income.png").default,
       to: "/store/income-statement-report",
-      description:"",
+      description: "",
     },
     {
       label: "Trial Balance",
       image: require("@/assets/menu-icons/reports/trail_balance.png").default,
       to: "/store/trial-balance-report",
-      description:"",
+      description: "",
     },
     {
       label: "Ledger Statement",
       image: require("@/assets/menu-icons/reports/ledger.png").default,
       to: "/store/ledger-statement",
-      description:"",
+      description: "",
     },
     {
       label: "Tax Report",
       image: require("@/assets/menu-icons/reports/tax.png").default,
       to: "/store/tax-report",
-      description:"",
+      description: "",
     },
     {
       label: "Bank Reconciliation",
       image: require("@/assets/menu-icons/reports/bank.png").default,
       to: "/store/bank-reconciliation",
-      description:"",
+      description: "",
     },
     {
       label: "Account Statement",
-      image: require("@/assets/menu-icons/reports/account_statement.png").default,
+      image: require("@/assets/menu-icons/reports/account_statement.png")
+        .default,
       to: "/store/account-statement",
-      description:"",
+      description: "",
     },
-     {
+    {
       label: "Stock Report",
       image: require("@/assets/menu-icons/reports/stock.png").default,
       to: "/store/stock-report",
-      description:"",
+      description: "",
     },
     {
       label: "Stock Alert Report",
       image: require("@/assets/menu-icons/reports/alert.png").default,
       to: "/store/stock-alert-report",
-      description:"",
-     },
+      description: "",
+    },
     // {
     //   label: "Activity Report",
     //   image: require("@/assets/menu-icons/reports/activity.png").default,
@@ -133,15 +136,16 @@ export default class Report extends mixins(UtilityOptions) {
     {
       label: "Stock Expiry Report",
       image: require("@/assets/menu-icons/reports/expiry.png").default,
-      to: "/store/expiry-report",
-      description:"",
+      to: "/store/expiry_report",
+      description: "",
     },
     {
       label: "Expiry Return Report",
-      image: require("@/assets/menu-icons/reports/sales_refund_report.png").default,
+      image: require("@/assets/menu-icons/reports/sales_refund_report.png")
+        .default,
       to: "/store/exp-return-report",
-      description:"",
-    }
+      description: "",
+    },
   ];
 }
 </script>
