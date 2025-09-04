@@ -1295,10 +1295,10 @@ class StoreReportController extends Controller
 		$expirySQL="";
 
 		if($supplier>0){
-			$expirySQL=	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date), psr.total_unit, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM `pos_sub_receipts` psr, pos_receipts pr, profilers p WHERE psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id and pr.profile_id=$supplier order by psr.expiry_date DESC;";
+			$expirySQL=	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date),format( (s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM `pos_sub_receipts` psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id and pr.profile_id=$supplier order by psr.expiry_date DESC;";
 
 		} else{
-			$expirySQL=		"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no,(pr.receipt_date), psr.total_unit, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM `pos_sub_receipts` psr, pos_receipts pr, profilers p WHERE psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id order by psr.expiry_date DESC;";
+			$expirySQL=		"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no,(pr.receipt_date), format((s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM `pos_sub_receipts` psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id order by psr.expiry_date DESC;";
 
 		}
 		$record = DB::select( DB::raw($expirySQL));
