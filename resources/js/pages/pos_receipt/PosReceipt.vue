@@ -61,64 +61,93 @@
                     <tr class="table-row">
 
                       <td style="width:18rem">
-                        <AutoComplete :delay="1000" :minLength="3" @key=index @item-select="saveItem($event, index)"
+                        <div v-if="savedItem.showVariations" class="variation-dropdown">
+                          <Dropdown v-model="savedItem.selectedVariation" 
+                                    :options="savedItem.variationsList" 
+                                    optionLabel="displayName"
+                                    placeholder="Select Variation"
+                                    @change="selectVariationFromDropdown($event, index)"
+                                    style="width: 18rem">
+                            <template #option="slotProps">
+                              <div class="variation-option">
+                                <div class="variation-name">{{ slotProps.option.product_name }}</div>
+                                <div class="variation-details">
+                                  <span>Batch: {{ slotProps.option.batch_no }}</span>
+                                  <span>Stock: {{ slotProps.option.qty }}</span>
+                                  <span>Price: {{ currency }} {{ slotProps.option.sale_price }}</span>
+                                </div>
+                              </div>
+                            </template>
+                          </Dropdown>
+                        </div>
+                        <AutoComplete v-else :delay="1000" :minLength="3" @item-select="saveItem($event, index)"
                           scrollHeight="500px" v-model="savedItem.productName" :suggestions="itemList"
                           placeholder=" SCAN BARCODE OR SEARCH ITEMS" @complete="searchItem($event)" :dropdown="false"
                           autoFocus inputStyle="width:18rem">
                           <template #item="slotProps">
-                            <div>
+                            <div v-if="slotProps.item.isUniqueProduct" class="unique-product-item">
                               <span class="p-mr-1">
-                                ITEM NAME :
-                                <b class="pull-right">
-                                  {{ slotProps.item.product_name.toUpperCase() }}
-                                </b>
-                              </span>
-                              <span class="p-mx-1">
-                                EXPIRY DATE :
-                                <b class="pull-right">
-                                  {{ formatExpiryDate(slotProps.item.expiry_date) }}
+                                <i class="pi pi-chevron-right" style="color: #1976d2;"></i>
+                                <b style="color: #1976d2; font-size: 16px; margin-left: 8px;">
+                                  {{ slotProps.item.base_product_name.toUpperCase() }} ({{ slotProps.item.variation_count }} variations)
                                 </b>
                               </span>
                             </div>
-                            <div>
-                              <span>
-                                GENERIC :
-                                <b class="pull-right">
-                                  {{ slotProps.item.generic.toUpperCase() }}
-                                </b>
-                              </span>
-                            </div>
-                            <div>
-                              <small>
-                                BATCH NO :
-                                <b class="pull-right">
-                                  {{ slotProps.item.batch_no }}
-                                </b>
-                              </small>
-                              <small>
-                                Total Units :
-                                <b class="pull-right">
-                                  {{ slotProps.item.qty }}
-                                </b>
-                              </small>
-                              <small v-if="item.type != 'TRN'">
-                                Pack Price :
-                                <b class="pull-right">
-                                  {{ currency }} {{ slotProps.item.sale_price }}
-                                </b>
-                              </small>
-                              <small v-else>
-                                Purchase Price :
-                                <b class="pull-right">
-                                  {{ currency }} {{ slotProps.item.purchase_price }}
-                                </b>
-                              </small>
-                              <small>
-                                Brand Name :
-                                <b class="pull-right">
-                                  {{ slotProps.item.bName }}
-                                </b>
-                              </small>
+                            <div v-else>
+                              <div>
+                                <span class="p-mr-1">
+                                  ITEM NAME :
+                                  <b class="pull-right">
+                                    {{ slotProps.item.product_name.toUpperCase() }}
+                                  </b>
+                                </span>
+                                <span class="p-mx-1">
+                                  EXPIRY DATE :
+                                  <b class="pull-right">
+                                    {{ formatExpiryDate(slotProps.item.expiry_date) }}
+                                  </b>
+                                </span>
+                              </div>
+                              <div>
+                                <span>
+                                  GENERIC :
+                                  <b class="pull-right">
+                                    {{ slotProps.item.generic.toUpperCase() }}
+                                  </b>
+                                </span>
+                              </div>
+                              <div>
+                                <small>
+                                  BATCH NO :
+                                  <b class="pull-right">
+                                    {{ slotProps.item.batch_no }}
+                                  </b>
+                                </small>
+                                <small>
+                                  Total Units :
+                                  <b class="pull-right">
+                                    {{ slotProps.item.qty }}
+                                  </b>
+                                </small>
+                                <small v-if="item.type != 'TRN'">
+                                  Pack Price :
+                                  <b class="pull-right">
+                                    {{ currency }} {{ slotProps.item.sale_price }}
+                                  </b>
+                                </small>
+                                <small v-else>
+                                  Purchase Price :
+                                  <b class="pull-right">
+                                    {{ currency }} {{ slotProps.item.purchase_price }}
+                                  </b>
+                                </small>
+                                <small>
+                                  Brand Name :
+                                  <b class="pull-right">
+                                    {{ slotProps.item.bName }}
+                                  </b>
+                                </small>
+                              </div>
                             </div>
                           </template>
                         </AutoComplete>
@@ -430,6 +459,52 @@
 
 
 
+
+
+
+
+<!-- this is soumik code - Dropdown Variation Styles -->
+<style scoped>
+.unique-product-item {
+  padding: 8px;
+  background-color: #e3f2fd;
+  border-left: 4px solid #1976d2;
+  margin: 2px 0;
+  cursor: pointer;
+}
+
+.unique-product-item:hover {
+  background-color: #bbdefb;
+}
+
+.variation-dropdown {
+  width: 18rem;
+}
+
+.variation-option {
+  padding: 8px;
+}
+
+.variation-name {
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 4px;
+}
+
+.variation-details {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+}
+
+.variation-details span {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+</style>
+
 <div style="background-color: rgb(74, 52, 140); width: 2.28in; display: none" id="invoiceArea">
   <div>
             
@@ -585,6 +660,12 @@ export default class PosReceipt extends Vue {
   private store = useStore();
   private billDiscount = 0;
   private billAdjustment = 0;
+  //this is soumik code - sidebar panel approach for variations
+  private showingVariations = false;
+  private selectedProduct = null;
+  private variationsList = [];
+  private variationsSidebar = false;
+  private currentRowIndex = 0;
 
   private counterEntry: CounterEntry[] = [];
 
@@ -727,12 +808,104 @@ export default class PosReceipt extends Vue {
     }, 200);
   }
 
+  //this is soumik code - normal search for unique products
   searchItem(event) {
     setTimeout(() => {
       this.posService.searchItem(event.query.trim()).then((data) => {
-        this.itemList = this.filterItems(data.records);
+        this.itemList = this.filterUniqueItems(data.records);
       });
     }, 200);
+  }
+
+  //this is soumik code - filter unique items for initial search with new backend structure
+  filterUniqueItems(records) {
+    return records.map(item => ({
+      ...item,
+      isUniqueProduct: true,
+      displayName: `${item.base_product_name} (${item.variation_count} variations)`,
+      product_name: item.base_product_name, // Use base product name for display
+      bName: 'Multiple Brands', // Since we removed brand from grouping
+      cName: 'Multiple Categories' // Since we removed category from grouping
+    }));
+  }
+
+  //this is soumik code - load variations in dropdown
+  loadProductVariationsDropdown(baseProductName, generic, index) {
+    console.log('Loading variations for dropdown:', baseProductName, generic);
+    
+    this.posService.getProductVariations(baseProductName, generic).then((data) => {
+      console.log('Variations received:', data.records);
+      const variations = this.filterItems(data.records);
+      
+      // Add display name for dropdown
+      const variationsWithDisplay = variations.map(v => ({
+        ...v,
+        displayName: `${v.product_name} - Batch: ${v.batch_no} - Stock: ${v.qty}`
+      }));
+      
+      // Update the saved item to show dropdown
+      this.savedItemList[index].showVariations = true;
+      this.savedItemList[index].variationsList = variationsWithDisplay;
+      this.savedItemList[index].productName = baseProductName;
+      
+    }).catch((error) => {
+      console.error('Error getting variations:', error);
+    });
+  }
+
+  //this is soumik code - select variation from dropdown
+  selectVariationFromDropdown(event, index) {
+    const variation = event.value;
+    if (!variation) return;
+    
+    let sellRate = 0;
+    let disc = 0;
+
+    if (this.item.type != "TRN") {
+      sellRate = variation.sale_price;
+      disc = variation.discount_percentage;
+    } else {
+      sellRate = variation.purchase_price;
+      disc = 0;
+    }
+
+    this.savedItemList[index] = {
+      mode: "Strip",
+      stockID: variation.id,
+      productName: variation.product_name,
+      generic: variation.generic,
+      itemDescription: variation.description,
+      leaf: 0,
+      unit: 0,
+      totalUnit: 0,
+      stockQty: Number(variation.qty),
+      freeUnit: 0,
+      supplierBonus: 0,
+      batchNo: variation.batch_no,
+      packSize: Number(variation.pack_size),
+      sheetSize: Number(variation.strip_size),
+      purchasePrice: Number(variation.purchase_price),
+      originalPPrice: Number(variation.purchase_price),
+      originalSPrice: Number(sellRate),
+      sellingPrice: Number(sellRate),
+      mrp: Number(variation.mrp),
+      brandName: variation.bName,
+      sectorName: variation.bSector,
+      categoryName: variation.cName,
+      productType: variation.pType,
+      expiryDate: variation.expiry_date,
+      itemDisc: Number(disc),
+      tax1: Number(variation.tax_1),
+      tax2: Number(variation.tax_2),
+      tax3: Number(variation.tax_3),
+      subTotal: 0,
+      showVariations: false,
+      variationsList: [],
+      selectedVariation: null
+    };
+
+    // Add new row
+    this.openNewRow();
   }
 
   filterItems(records) {
@@ -768,8 +941,17 @@ export default class PosReceipt extends Vue {
      this.item.description=e.target.value;
   }
 
+  //this is soumik code - modified saveItem to handle unique products and variations
   saveItem(event, index) {
     const itemInfo = event.value;
+    
+    // Check if this is a unique product (needs to show variations)
+    if (itemInfo.isUniqueProduct) {
+      this.loadProductVariationsDropdown(itemInfo.base_product_name, itemInfo.generic, index);
+      return;
+    }
+    
+
     
     let sellRate = 0;
     let disc = 0;
@@ -854,6 +1036,9 @@ export default class PosReceipt extends Vue {
       tax2: 0,
       tax3: 0,
       subTotal: 0,
+      showVariations: false,
+      variationsList: [],
+      selectedVariation: null
     });
 
     this.itemScanBox = "";

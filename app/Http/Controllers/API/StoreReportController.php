@@ -1138,6 +1138,15 @@ class StoreReportController extends Controller
 
 
 				$returnVoucher->save();
+
+				//now update the stock
+				 $stockId = isset($r->stockID) ? $r->stockID : $r->stockId;
+				 $stock = Stock::findOrFail($stockId);
+				 $stock->qty = $stock->qty - ($r->tax3 * $stock->strip_size);
+				 $stock->update();
+
+
+
 			}
 
 			// new code copy here 
@@ -1150,12 +1159,17 @@ class StoreReportController extends Controller
 			$transaction->save();
 
 			foreach ($counterEntry as $item) {
+				$accountId = isset($item->accountID) ? $item->accountID : $item->accountId;
+				$accountHead = isset($item->accountHead) ? $item->accountHead : $item->accountHead;
+				$amount = isset($item->amount) ? $item->amount : 0;
+				$type = isset($item->type) ? $item->type : 'Debit';
+				
 				$subTransaction = new SubTransaction([
 					'transaction_id'     => $transaction->id,
-					'account_id'     	 => $item->accountID,
-					'account_name'	 	 => $item->accountHead,
-					'amount'      	     => $item->amount,
-					'type'      		 => $item->type,
+					'account_id'     	 => $accountId,
+					'account_name'	 	 => $accountHead,
+					'amount'      	     => $amount,
+					'type'      		 => $type,
 				]);
 
 				$subTransaction->save();
@@ -1199,10 +1213,11 @@ class StoreReportController extends Controller
 
 		$expirySQL = "";
 
+		//this is soumik code - back to original query but with proper stock sync
 		if ($supplier > 0) {
-			$expirySQL =	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date),format( (s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM pos_sub_receipts psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id and pr.profile_id=$supplier order by psr.expiry_date DESC";
+			$expirySQL =	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date),format( (s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3,psr.stock_id as stockID FROM pos_sub_receipts psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id and pr.profile_id=$supplier order by psr.expiry_date DESC";
 		} else {
-			$expirySQL =	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date),format( (s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3 FROM pos_sub_receipts psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id order by psr.expiry_date DESC";
+			$expirySQL =	"SELECT psr.id,pr.receipt_no,pr.bill_no,psr.sub_total*0, p.account_title, psr.item_name, (psr.expiry_date), psr.batch_no, (pr.receipt_date),format( (s.qty/s.strip_size),0) as qty, psr.purchase_price, psr.purchase_disc, psr.tax_1, psr.tax_2, psr.tax_3,psr.stock_id as stockID FROM pos_sub_receipts psr, pos_receipts pr, profilers p, stocks s WHERE s.qty>0 and psr.stock_id=s.id and psr.expiry_date between '$date1' and '$date2' and pr.bill_no!='' and pr.id=psr.pos_receipt_id and pr.profile_id=p.id order by psr.expiry_date DESC";
 		}
 		$record = DB::select(DB::raw($expirySQL));
 

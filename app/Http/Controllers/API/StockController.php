@@ -513,15 +513,13 @@ class StockController extends Controller
 		return response()->json($stocks);
 	}
 
+	//this is soumik code - improved search to show truly unique base product names only
 	public function searchItems(Request $request)
 	{
 		$keyword = $request['keyword'];
 
+		//this is soumik code - get unique base product names by taking first word only
 		$stocks = DB::table('stocks')
-			->leftJoin('option_tags as brand', 'brand.id', '=', 'stocks.brand')
-			->leftJoin('option_tags as brand_sector', 'brand_sector.id', '=', 'stocks.brand_sector')
-			->leftJoin('option_tags as category', 'category.id', '=', 'stocks.category')
-			->leftJoin('option_tags as type', 'type.id', '=', 'stocks.type')
 			->where('stocks.branch_id', Auth::user()->branch_id)
 			->where('stocks.status', 'Active')
 			->where(function ($query) use ($keyword) {
@@ -530,13 +528,57 @@ class StockController extends Controller
 					->orWhere('stocks.barcode', 'LIKE', $keyword . '%');
 			})
 			->select(
+				DB::raw('TRIM(SUBSTRING_INDEX(stocks.product_name, " ", 1)) as base_product_name'),
+				DB::raw('MIN(stocks.generic) as generic'),
+				DB::raw('COUNT(*) as variation_count'),
+				DB::raw('MIN(stocks.id) as sample_id'),
+				DB::raw('MIN(stocks.product_name) as product_name')
+			)
+			->groupBy(
+				DB::raw('TRIM(SUBSTRING_INDEX(stocks.product_name, " ", 1))')
+			)
+			->having('base_product_name', '!=', '')
+			->having('base_product_name', 'NOT LIKE', '%0%')
+			->having('base_product_name', 'NOT LIKE', '%1%')
+			->having('base_product_name', 'NOT LIKE', '%2%')
+			->having('base_product_name', 'NOT LIKE', '%3%')
+			->having('base_product_name', 'NOT LIKE', '%4%')
+			->having('base_product_name', 'NOT LIKE', '%5%')
+			->having('base_product_name', 'NOT LIKE', '%6%')
+			->having('base_product_name', 'NOT LIKE', '%7%')
+			->having('base_product_name', 'NOT LIKE', '%8%')
+			->having('base_product_name', 'NOT LIKE', '%9%')
+			->limit(20)
+			->orderBy('base_product_name', 'ASC')
+			->get();
+
+		return [
+			'records' => $stocks
+		];
+	}
+
+	//this is soumik code - new method to get all variations of a base product
+	public function getProductVariations(Request $request)
+	{
+		$baseProductName = $request['base_product_name'];
+		$generic = $request['generic'];
+
+		//this is soumik code - get all variations that start with the base product name
+		$stocks = DB::table('stocks')
+			->leftJoin('option_tags as brand', 'brand.id', '=', 'stocks.brand')
+			->leftJoin('option_tags as brand_sector', 'brand_sector.id', '=', 'stocks.brand_sector')
+			->leftJoin('option_tags as category', 'category.id', '=', 'stocks.category')
+			->leftJoin('option_tags as type', 'type.id', '=', 'stocks.type')
+			->where('stocks.branch_id', Auth::user()->branch_id)
+			->where('stocks.status', 'Active')
+			->where('stocks.product_name', 'LIKE', $baseProductName . '%')
+			->select(
 				'stocks.*',
 				'brand.option_name as bName',
 				'brand_sector.option_name as bSector',
 				'category.option_name as cName',
 				'type.option_name as pType'
 			)
-			->limit(20)
 			->orderBy('stocks.product_name', 'ASC')
 			->get();
 

@@ -57,22 +57,39 @@
                     <template #empty>
                         <div class="p-text-center p-p-3">No records found</div>
                     </template>
-                    <Column selectionMode="multiple"  headerStyle="width: 3rem"></Column>
-                    <Column field="itemName" header="Product"></Column>
+                    <!-- THIS IS SOUMIK CODE - Smaller checkbox column -->
+                    <Column selectionMode="multiple" headerStyle="width: 2rem"></Column>
+                    <!-- THIS IS SOUMIK CODE - Wider product name column -->
+                    <Column field="itemName" header="Product" style="min-width: 200px; max-width: 250px;">
+                        <template #body="{ data }">
+                            <span :title="data.itemName" style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ data.itemName }}
+                            </span>
+                        </template>
+                    </Column>
+                    <!-- THIS IS SOUMIK CODE - Hidden Stock ID column -->
+                    <!-- <Column field="stockId" header="Stock ID" :sortable="true" style="min-width: 120px;">
+                        <template #body="{ data }">
+                            <span class="font-weight-bold text-primary">{{ data.stockId }}</span>
+                        </template>
+                    </Column> -->
+
                     <Column field="receiptDate" header="Bill Date"></Column>
                     <Column field="billNo" header="Bill No"> </Column>
                     <Column field="expiryDate" header="Expiry Date"></Column>
                     <Column field="batchNo" header="Batch No"></Column>
                     <Column field="qty" header="Total Exp. Unit"></Column>
 
+                    <!-- THIS IS SOUMIK CODE - Return Qty as integer -->
                     <Column field="tax3" header="Return Qty">
                         <template #body="{ data }">
                             <input 
                                 type="number" 
-                                v-model="data.tax3" 
+                                v-model.number="data.tax3" 
                                 class="form-control" 
                                 style="width: 80px;"
                                 min="0"
+                                step="1"
                                 :max="data.totalUnit"
                                 @input="handleReturnQtyChange(data, $event)"
                                 :disabled="!isProductSelected(data)"
@@ -103,54 +120,82 @@
             <!--                    class="p-datatable-sm p-datatable-striped p-datatable-gridlines"-->
        
 
-  <div id="invoiceArea" style="display: block;">
+  <!-- THIS IS SOUMIK CODE - Improved Print Design -->
+  <div id="invoiceArea" style="display: block; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
     <!-- Header Section -->
-    <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
-      <h1 style="margin: 0; color: #333; font-size: 24px;">Aadyamaa Medical Shop</h1>
-      <h2 style="margin: 10px 0 0 0; color: #333;">Expiry Return Voucher</h2>
-      <h3 style="margin: 5px 0; color: #666;">Supplier: {{ searchFilters.customerName }}</h3>
-      <p style="margin: 5px 0; font-size: 14px;">Date: {{ getCurrentFormattedDate() }}</p>
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2c3e50; padding-bottom: 15px;">
+      <h1 style="margin: 0; color: #2c3e50; font-size: 28px; font-weight: bold;">AADYAMAA MEDICAL SHOP</h1>
+      <h2 style="margin: 10px 0 5px 0; color: #e74c3c; font-size: 20px;">EXPIRY RETURN VOUCHER</h2>
+      <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="text-align: left;">
+          <p style="margin: 2px 0; font-size: 14px; color: #34495e;"><strong>Supplier:</strong> {{ searchFilters.customerName }}</p>
+          <p style="margin: 2px 0; font-size: 14px; color: #34495e;"><strong>Date:</strong> {{ getCurrentFormattedDate() }}</p>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 2px 0; font-size: 14px; color: #34495e;"><strong>Voucher No:</strong> RV-{{ getCurrentFormattedDate().replace(/\//g, '') }}-001</p>
+          <p style="margin: 2px 0; font-size: 14px; color: #34495e;"><strong>Total Items:</strong> {{ selectedProducts.length }}</p>
+        </div>
+      </div>
     </div>
     
-    <table style="width: 100%; border: 2px;">
-      <thead style="background-color: lightblue;">
-        <tr>
-          <th>Product</th>
-          <th>Bill Date</th>
-          <th>Bill No</th>
-          <th>Expiry </th>
-          <th>Batch</th>
-          <th>Return Qty</th>
-          <th>Purchase Price</th>
-           <th>Discount</th>
-          <th>SGST</th>
-          <th>CGST</th>
-          <th>Total</th>
-
+    <!-- Items Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+      <thead>
+        <tr style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: left; font-size: 12px; font-weight: bold;">PRODUCT NAME</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: bold;">BATCH</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: bold;">EXPIRY</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: bold;">BILL NO</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: bold;">BILL DATE</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: bold;">QTY</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: right; font-size: 12px; font-weight: bold;">PRICE</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: right; font-size: 12px; font-weight: bold;">DISC%</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: right; font-size: 12px; font-weight: bold;">SGST%</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: right; font-size: 12px; font-weight: bold;">CGST%</th>
+          <th style="border: 1px solid #2980b9; padding: 12px 8px; text-align: right; font-size: 12px; font-weight: bold;">TOTAL</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in selectedProducts" :key="item.id" style="border: 1px solid;">
-          <td>{{ item.itemName }}</td>
-          <td>{{ item.receiptDate }}</td>
-          <td>{{ item.billNo }}</td>
-          <td>{{ item.expiryDate }}</td>
-          <td>{{ item.batchNo }}</td>
-          <td>{{ item.tax3 }}</td>
-          <td>{{ item.purchasePrice }}</td>
-          <td>{{ item.purchaseDisc }}</td>
-          <td>{{ item.tax1 }}</td>
-          <td>{{ item.tax2 }}</td>
-          <td>{{ item.subTotal }}</td>
-
-
-        </tr>
-        <tr>
-            <td colspan="10">Grand Total</td>
-            <td>{{ this.getRetTotal() }}</td>
+        <tr v-for="(item, index) in selectedProducts" :key="item.id" 
+            :style="{ backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff', borderBottom: '1px solid #dee2e6' }">
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; font-size: 11px; max-width: 150px; word-wrap: break-word;">{{ item.itemName }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; font-size: 11px;">{{ item.batchNo }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; font-size: 11px;">{{ item.expiryDate }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; font-size: 11px;">{{ item.billNo }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; font-size: 11px;">{{ item.receiptDate }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: bold; color: #e74c3c;">{{ Math.floor(item.tax3) }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: right; font-size: 11px;">₹{{ parseFloat(item.purchasePrice).toFixed(2) }}</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: right; font-size: 11px;">{{ parseFloat(item.purchaseDisc).toFixed(1) }}%</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: right; font-size: 11px;">{{ parseFloat(item.tax1).toFixed(1) }}%</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: right; font-size: 11px;">{{ parseFloat(item.tax2).toFixed(1) }}%</td>
+          <td style="border: 1px solid #dee2e6; padding: 10px 8px; text-align: right; font-size: 11px; font-weight: bold; color: #27ae60;">₹{{ parseFloat(item.subTotal).toFixed(2) }}</td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr style="background: linear-gradient(135deg, #27ae60, #229954); color: white;">
+          <td colspan="10" style="border: 1px solid #229954; padding: 12px 8px; text-align: right; font-size: 14px; font-weight: bold;">GRAND TOTAL:</td>
+          <td style="border: 1px solid #229954; padding: 12px 8px; text-align: right; font-size: 14px; font-weight: bold;">₹{{ parseFloat(this.getRetTotal()).toFixed(2) }}</td>
+        </tr>
+      </tfoot>
     </table>
+
+    <!-- Footer Section -->
+    <div style="margin-top: 30px; border-top: 2px solid #2c3e50; padding-top: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="text-align: left;">
+          <p style="margin: 5px 0; font-size: 12px; color: #7f8c8d;"><strong>Prepared By:</strong> ________________</p>
+          <p style="margin: 5px 0; font-size: 12px; color: #7f8c8d;"><strong>Signature:</strong></p>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 5px 0; font-size: 12px; color: #7f8c8d;"><strong>Authorized By:</strong> ________________</p>
+          <p style="margin: 5px 0; font-size: 12px; color: #7f8c8d;"><strong>Signature:</strong></p>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px; padding: 10px; background-color: #ecf0f1; border-radius: 5px;">
+        <p style="margin: 0; font-size: 11px; color: #7f8c8d; font-style: italic;">This is a computer generated return voucher for expired medicines.</p>
+        <p style="margin: 5px 0 0 0; font-size: 11px; color: #7f8c8d;">Generated on: {{ getCurrentFormattedDate() }} | Total Return Value: ₹{{ parseFloat(this.getRetTotal()).toFixed(2) }}</p>
+      </div>
+    </div>
   </div>
 
             <Dialog
@@ -357,11 +402,14 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
         this.loading = true;
         this.reportService.stockExpiryReport(this.searchFilters).then((res) => {
             const data = this.camelizeKeys(res);
-           //alert(JSON.stringify(data));
+            console.log('Raw API Response:', res);
+            console.log('Camelized Data:', data);
+            console.log('First Record:', data.record[0]);
             this.resultTitle = data.resultTitle;
             this.lists = data.record.map(item => ({
                 ...item,totalUnit2 :0
             }));
+
             this.loading = false;
         });
         this.productDialog = false;
@@ -370,32 +418,38 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
     //used to create return voucher
     returnVoucher(){
         console.log('type of selectedProducts: '+typeof this.selectedProducts);
-        //alert('returning items '+JSON.stringify(this.selectedProducts));
-        //document.getElementById("billNo").textContent=res.rno;
         let returnList = this.selectedProducts;
-        let supplierID =this.searchFilters.customerID;
+        let supplierID = this.searchFilters.customerID;
         let total = this.getRetTotal();
-        // alert('Total to return: '+total);
-        console.log("Return List: "+returnList);
+        
+        console.log('Total amount:', total);
+        console.log('Supplier ID:', supplierID);
+        
+        // Clear previous counter entries
+        this.counterEntry = [];
+        
+        // Ensure total is a valid number
+        if (!total || isNaN(total) || total <= 0) {
+            alert('Please select products and enter return quantities');
+            return;
+        }
+        
         this.counterEntry.push({
             accountID: 2,
             accountHead: 'Expiry Return',
-            amount: total,
+            amount: Number(total),
             type: "Debit",
-          });
+        });
+        
+        console.log('Counter Entry:', JSON.stringify(this.counterEntry));
+        
         //call to save the return voucher
        this.reportService.saveReturnVoucher(null, supplierID, total, returnList, this.counterEntry).then((res) => {
-            //const data = this.camelizeKeys(res);
-            //console.log("Return Voucher No: "+data.rno);
-            
-
             //print the voucher
             var a = window.open('', '', 'height=500, width=500');
             a?.document.write(document.getElementById('invoiceArea')?.innerHTML);
            a?.print();
-          
             });
-        
     }
 
     
@@ -420,11 +474,14 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
                 return;
             }
             //alert(data.qty+'...'+newValue);
-            // Validate return quantity doesn't exceed total units
-            if (newValue > data.qty) {
+            // THIS IS SOUMIK CODE - Validate return quantity as integer
+            const intValue = Math.floor(Number(newValue)) || 0;
+            if (intValue > data.qty) {
                 alert('Return quantity cannot exceed total units');
                  data[field] = 0;
                  newValue = 0;
+            } else {
+                newValue = intValue;
             }
         }
         
@@ -485,8 +542,9 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
         );
     }
 
+    // THIS IS SOUMIK CODE - Handle return qty as integer
     handleReturnQtyChange(data, event) {
-        const value = Number(event.target.value);
+        const value = Math.floor(Number(event.target.value)) || 0;
         
         // Instant validation - Check if exceeds total units
         if (value > data.totalUnit) {
@@ -494,8 +552,8 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
             alert(`Return quantity not acceptable! Total unit is ${data.totalUnit}, you entered ${value}`);
             
             // Reset to maximum allowed value
-            data.tax3 = data.totalUnit;
-            event.target.value = data.totalUnit;
+            data.tax3 = Math.floor(data.totalUnit);
+            event.target.value = Math.floor(data.totalUnit);
             
             // Force focus back to input to show the corrected value
             setTimeout(() => {
@@ -506,7 +564,7 @@ export default class StockExpiryReport extends mixins(UtilityOptions) {
             return;
         }
         
-        // If value is valid, update the data
+        // If value is valid, update the data as integer
         data.tax3 = value;
         
         // Update selected products array

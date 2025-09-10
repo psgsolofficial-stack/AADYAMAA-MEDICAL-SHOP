@@ -4,7 +4,6 @@ import instance from './index';
 
 export default class StoreReports {
 
-
 	getFilterList() {
 		//SHOW LOADING
 		const store = useStore();
@@ -19,7 +18,6 @@ export default class StoreReports {
 	}
 
 	salesRefundReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -30,13 +28,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -44,7 +40,6 @@ export default class StoreReports {
 	}
 	
 	taxReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -55,22 +50,18 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			})
 	}
 	
-	
 	userActivityReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -81,13 +72,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -95,9 +84,7 @@ export default class StoreReports {
 	}
 	
 	stockExpiryReport(postObj) {
-
 		const f = JSON.stringify(postObj);
-		//alert("expiry filters "+f);
 		//SHOW LOADING
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
@@ -106,13 +93,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -121,7 +106,6 @@ export default class StoreReports {
 
 	//sam
 	saveReturnVoucher(postObj, supplierID, total, returnList, counterEntry){
-
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
 		const api = "/api/save_return_voucher";
@@ -130,29 +114,21 @@ export default class StoreReports {
 		const formData = new FormData();
 		formData.append('returnList', JSON.stringify(returnList));
 		formData.append('counterEntry', JSON.stringify(counterEntry));
-
-
-
 		formData.append('totalAmount', total);
 		formData.append('supplierID', supplierID);
-		//alert('form data is '+formData);
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			})
 	}
-
-	
 	
 	userReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -163,13 +139,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -177,7 +151,6 @@ export default class StoreReports {
 	}
 	
 	stockReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -188,13 +161,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -202,7 +173,6 @@ export default class StoreReports {
 	}
 	
 	stockAlertReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -213,13 +183,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -227,7 +195,6 @@ export default class StoreReports {
 	}
 	
 	purchaseReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -235,16 +202,14 @@ export default class StoreReports {
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
 		const api = '/api/purchasing_report';
 		const formData = new FormData();
-      //  alert("report filter "+f);
+
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -252,7 +217,6 @@ export default class StoreReports {
 	}
 	
 	performanceReport(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -263,13 +227,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -277,7 +239,6 @@ export default class StoreReports {
 	}
 	
 	generalJournal(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -288,13 +249,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -302,7 +261,6 @@ export default class StoreReports {
 	}
 	
 	incomeStatement(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -313,13 +271,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -327,7 +283,6 @@ export default class StoreReports {
 	}
 	
 	trialBalance(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -338,13 +293,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -352,7 +305,6 @@ export default class StoreReports {
 	}
 	
 	ledgerStatement(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -363,13 +315,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -377,7 +327,6 @@ export default class StoreReports {
 	}
 	
 	bankStatement(postObj) {
-
 		const f = JSON.stringify(postObj);
 		
 		//SHOW LOADING
@@ -388,13 +337,11 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -407,11 +354,9 @@ export default class StoreReports {
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
 		const api = '/api/get_all_bank';
 	
-		return instance()(
-			{
-				url: api,
-			}
-		).then(res => res.data)
+		return instance()({
+			url: api,
+		}).then(res => res.data)
 		.catch((e) => ExceptionHandling.HandleErrors(e))
 		.finally(() => {
 			store.dispatch(ActionTypes.PROGRESS_BAR, false);
@@ -421,7 +366,6 @@ export default class StoreReports {
 	accountStatement(postObj) {
 		const f = JSON.stringify(postObj);
 		
-		//SHOW LOADING
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
 		const api = '/api/account_statement';
@@ -429,37 +373,24 @@ export default class StoreReports {
 
 		formData.append('filters', f);
 
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance()({
+			method: 'post',
+			url: api,
+			data: formData,
+		}).then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			});
 	}
-	
-	transferReport(postObj) {
-		const f = JSON.stringify(postObj);
-		
-		//SHOW LOADING
+
+	getStockIds() {
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
-		const api = '/api/transfer_report';
-		const formData = new FormData();
+		const api = '/api/get_stock_ids';
 
-		formData.append('filters', f);
-
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
-			}
-		).then(res => res.data)
+		return instance().get(api)
+			.then(res => res.data)
 			.catch((e) => ExceptionHandling.HandleErrors(e))
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
