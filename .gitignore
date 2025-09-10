@@ -3,6 +3,7 @@
 # Dependencies
 node_modules/
 # vendor/ - removed as per sir's requirement for live deployment
+vendor
 
 # Environment files
 .env
@@ -19,6 +20,7 @@ storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*.php
+
 
 # Logs
 *.log
