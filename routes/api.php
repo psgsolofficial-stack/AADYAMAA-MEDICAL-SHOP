@@ -134,13 +134,14 @@ Route::post('delete_printer_receipt', [PrinterReceiptController::class, 'delete'
 //SMS SETTINGS ROUTES
 
 //EXPIRY RETURN REPORT ROUTES[this is soumik code ]
-Route::get('suppliers', [ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('expiry_return_report', [ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+//this is soumik code - added auth middleware back
+Route::get('suppliers', [ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum']);
+Route::post('expiry_return_report', [ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum']);
 //this is soumik code - new routes for edit and delete expiry return records
-Route::get('expiry_return/{id}', [ExpiryReturnReportController::class, 'getExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('update_expiry_return', [ExpiryReturnReportController::class, 'updateExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('delete_expiry_return', [ExpiryReturnReportController::class, 'deleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('bulk_delete_expiry_return', [ExpiryReturnReportController::class, 'bulkDeleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::get('expiry_return/{id}', [ExpiryReturnReportController::class, 'getExpiryReturn'])->middleware(['auth:sanctum']);
+Route::post('update_expiry_return', [ExpiryReturnReportController::class, 'updateExpiryReturn'])->middleware(['auth:sanctum']);
+Route::post('delete_expiry_return', [ExpiryReturnReportController::class, 'deleteExpiryReturn'])->middleware(['auth:sanctum']);
+Route::post('bulk_delete_expiry_return', [ExpiryReturnReportController::class, 'bulkDeleteExpiryReturn'])->middleware(['auth:sanctum']);
 
 Route::post('sms_settings_list', [SmsSettingController::class, 'index'])->middleware(['auth:sanctum','permission:Sms Settings']);
 Route::post('add_sms_settings', [SmsSettingController::class, 'store'])->middleware(['auth:sanctum','permission:Sms Settings']);

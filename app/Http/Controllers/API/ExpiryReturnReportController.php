@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class ExpiryReturnReportController extends Controller
 {
-    // Get all suppliers from return_vouchers
+    //this is soumik code - Get all suppliers from return_vouchers (removed auth dependency)
     public function getSuppliers(Request $request)
     {
         try {
@@ -96,11 +96,12 @@ class ExpiryReturnReportController extends Controller
                 
                 $productValue = ($voucher->ret_quantity ?? 0) * ($voucher->purchase_price ?? 0);
                 
-                // THIS IS SOUMIK CODE - Get MRP from stocks table separately
+                // THIS IS SOUMIK CODE - Get MRP from stocks table separately with fallback
+                $branchId = Auth::check() ? Auth::user()->branch_id : 1;
                 $stockMrp = DB::table('stocks')
                     ->where('product_name', $voucher->product_name)
                     ->where('batch_no', $voucher->batch_no)
-                    ->where('branch_id', Auth::user()->branch_id)
+                    ->where('branch_id', $branchId)
                     ->value('mrp') ?? 0;
                 
                 $groupedBills[$billNo]['products'][] = [
@@ -180,10 +181,12 @@ class ExpiryReturnReportController extends Controller
             ]);
 
             // Update stock table - adjust stock based on return quantity changes
+            //this is soumik code - added fallback for branch_id
+            $branchId = Auth::check() ? Auth::user()->branch_id : 1;
             $stock = DB::table('stocks')
                 ->where('product_name', $request->product_name)
                 ->where('batch_no', $request->batch_no)
-                ->where('branch_id', Auth::user()->branch_id)
+                ->where('branch_id', $branchId)
                 ->first();
 
             if ($stock) {
@@ -239,10 +242,12 @@ class ExpiryReturnReportController extends Controller
             }
 
             // Restore stock quantity when deleting return record
+            //this is soumik code - added fallback for branch_id
+            $branchId = Auth::check() ? Auth::user()->branch_id : 1;
             $stock = DB::table('stocks')
                 ->where('product_name', $returnVoucher->product_name)
                 ->where('batch_no', $returnVoucher->batch_no)
-                ->where('branch_id', Auth::user()->branch_id)
+                ->where('branch_id', $branchId)
                 ->first();
 
             if ($stock) {
@@ -330,10 +335,12 @@ class ExpiryReturnReportController extends Controller
                 }
 
                 // Restore stock quantity when deleting return record
+                //this is soumik code - added fallback for branch_id in bulk delete
+                $branchId = Auth::check() ? Auth::user()->branch_id : 1;
                 $stock = DB::table('stocks')
                     ->where('product_name', $returnVoucher->product_name)
                     ->where('batch_no', $returnVoucher->batch_no)
-                    ->where('branch_id', Auth::user()->branch_id)
+                    ->where('branch_id', $branchId)
                     ->first();
 
                 if ($stock) {
