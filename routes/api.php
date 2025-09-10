@@ -24,6 +24,8 @@ use App\Http\Controllers\API\UserPrivilegesController;
 use App\Http\Controllers\API\HomeController;
 use App\Http\Controllers\API\StoreReportController;
 use App\Http\Controllers\API\SmsSettingController;
+use App\Http\Controllers\API\ExpiryReturnReportController;
+
 
 
 /*
@@ -131,14 +133,15 @@ Route::post('delete_printer_receipt', [PrinterReceiptController::class, 'delete'
 
 //SMS SETTINGS ROUTES
 
-//EXPIRY RETURN REPORT ROUTES
-Route::get('suppliers', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('expiry_return_report', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+//EXPIRY RETURN REPORT ROUTES[this is soumik code ]
+Route::get('suppliers', [ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::post('expiry_return_report', [ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
 //this is soumik code - new routes for edit and delete expiry return records
-Route::get('expiry_return/{id}', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'getExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('update_expiry_return', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'updateExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('delete_expiry_return', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'deleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
-Route::post('bulk_delete_expiry_return', [App\Http\Controllers\API\ExpiryReturnReportController::class, 'bulkDeleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::get('expiry_return/{id}', [ExpiryReturnReportController::class, 'getExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::post('update_expiry_return', [ExpiryReturnReportController::class, 'updateExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::post('delete_expiry_return', [ExpiryReturnReportController::class, 'deleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+Route::post('bulk_delete_expiry_return', [ExpiryReturnReportController::class, 'bulkDeleteExpiryReturn'])->middleware(['auth:sanctum','permission:Expiry Return Report']);
+
 Route::post('sms_settings_list', [SmsSettingController::class, 'index'])->middleware(['auth:sanctum','permission:Sms Settings']);
 Route::post('add_sms_settings', [SmsSettingController::class, 'store'])->middleware(['auth:sanctum','permission:Sms Settings']);
 Route::get('get_sms_settings/{id}', [SmsSettingController::class, 'show'])->middleware(['auth:sanctum','permission:Sms Settings']);
