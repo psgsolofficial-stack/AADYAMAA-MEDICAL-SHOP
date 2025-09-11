@@ -57,15 +57,14 @@ class ExpiryReturnReportController extends Controller
                 ], 400);
             }
 
-            // THIS IS SOUMIK CODE - Get return vouchers first, then get MRP separately
+            // THIS IS SOUMIK CODE - Group by supplier and date instead of individual bills
             $returnVouchers = ReturnVouchers::select(
                 'return_vouchers.*',
                 'profilers.account_title as supplier_name'
             )
             ->leftJoin('profilers', 'return_vouchers.supplier_id', '=', 'profilers.id')
             ->where('return_vouchers.supplier_id', $supplierId)
-            ->orderBy('return_vouchers.bill_no')
-            ->orderBy('return_vouchers.exp_date', 'desc')
+            ->orderBy('return_vouchers.created_at', 'desc')
             ->get();
 
             $groupedBills = [];
@@ -77,17 +76,14 @@ class ExpiryReturnReportController extends Controller
                     $supplierName = $voucher->supplier_name ?? 'Unknown Supplier';
                 }
                 
-                $billNo = $voucher->bill_no;
+                // Group by date instead of bill_no
+                $dateKey = date('Y-m-d', strtotime($voucher->created_at));
+                $billNo = 'EXP-RET-' . date('Ymd', strtotime($voucher->created_at));
                 
-                // Skip if bill_no is empty or null
-                if (empty($billNo)) {
-                    continue;
-                }
-                
-                if (!isset($groupedBills[$billNo])) {
-                    $groupedBills[$billNo] = [
+                if (!isset($groupedBills[$dateKey])) {
+                    $groupedBills[$dateKey] = [
                         'bill_no' => $billNo,
-                        'bill_date' => $voucher->bill_date,
+                        'bill_date' => date('d-m-Y', strtotime($voucher->created_at)),
                         'total_products' => 0,
                         'total_value' => 0,
                         'products' => []
@@ -96,15 +92,17 @@ class ExpiryReturnReportController extends Controller
                 
                 $productValue = ($voucher->ret_quantity ?? 0) * ($voucher->purchase_price ?? 0);
                 
-                // THIS IS SOUMIK CODE - Get MRP from stocks table separately with fallback
-                $branchId = Auth::check() ? Auth::user()->branch_id : 1;
+                // THIS IS SOUMIK CODE - Get MRP from stocks table with session/sanctum auth
+                $user = auth()->user() ?? auth('sanctum')->user();
+                $branchId = $user ? $user->branch_id : 1;
                 $stockMrp = DB::table('stocks')
                     ->where('product_name', $voucher->product_name)
                     ->where('batch_no', $voucher->batch_no)
                     ->where('branch_id', $branchId)
                     ->value('mrp') ?? 0;
                 
-                $groupedBills[$billNo]['products'][] = [
+                //this is soumik code - using date key for grouping
+                $groupedBills[$dateKey]['products'][] = [
                     'id' => $voucher->id,
                     'product_name' => $voucher->product_name,
                     'batch_no' => $voucher->batch_no,
@@ -115,8 +113,8 @@ class ExpiryReturnReportController extends Controller
                     'total_value' => $productValue
                 ];
                 
-                $groupedBills[$billNo]['total_products']++;
-                $groupedBills[$billNo]['total_value'] += $productValue;
+                $groupedBills[$dateKey]['total_products']++;
+                $groupedBills[$dateKey]['total_value'] += $productValue;
                 $totalProducts++;
             }
             

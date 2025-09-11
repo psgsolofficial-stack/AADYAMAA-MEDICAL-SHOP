@@ -134,7 +134,7 @@ Route::post('delete_printer_receipt', [PrinterReceiptController::class, 'delete'
 //SMS SETTINGS ROUTES
 
 //EXPIRY RETURN REPORT ROUTES[this is soumik code ]
-//this is soumik code - added auth middleware back
+//this is soumik code - back to auth:sanctum for user's machine compatibility
 Route::get('suppliers', [ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum']);
 Route::post('expiry_return_report', [ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum']);
 //this is soumik code - new routes for edit and delete expiry return records

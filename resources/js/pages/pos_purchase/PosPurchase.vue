@@ -205,6 +205,7 @@
                   <td>
                     <div class="p-inputgroup">
                      
+                      <!-- this is soumik code - fixed product selection and dropdown close -->
                       <AutoComplete
                           :delay="1000"
                           :minLength="3"
@@ -213,9 +214,12 @@
                           scrollHeight="500px"
                           v-model="savedItem.productName"
                           :suggestions="itemList"
+                          field="product_name"
                           placeholder=" SCAN BARCODE OR SEARCH ITEMS"
                           @complete="searchItem($event)"
                           :dropdown="false"
+                          :completeOnFocus="false"
+                          :forceSelection="true"
                           autoFocus
 
                        >
@@ -1190,14 +1194,14 @@ public calcMargin(savedItem){
  return 0;  
 }
 
-//sam
+//this is soumik code - fixed validItem to enable fields after product selection
 public validItem(index){
   console.log("################Index " +index +"...."+this.savedItemList[index].productName+"----"+this.savedItemList[index].stockID);
-  if(this.savedItemList[index].stockID==0){
-    return false;
+  // Enable fields if product is selected (stockID > 0) OR if productName is not empty
+  if(this.savedItemList[index].stockID > 0 || this.savedItemList[index].productName !== ''){
+    return true;
   }
- // alert("index "+index);
- return true;
+  return false;
 }
 
 public openFileUploader()
@@ -1584,16 +1588,25 @@ openNewRow(){
     preturn:0,
     isSelected:0,
     producType:0,
+    //this is soumik code - added HSN field for new rows
+    hsn: 0,
     
   });
 //alert("open new row "+JSON.stringify(this.savedItemList));
 }
 
 
+//this is soumik code - fixed product selection issue
 saveItem(event, index) {
   const itemInfo = event.value;
- // alert(index);
-  //alert('pospurchasevue save item qty'+itemInfo.expiry_date);
+  console.log('Selected item:', itemInfo);
+  
+  // Check if itemInfo is valid
+  if (!itemInfo || typeof itemInfo === 'string') {
+    console.error('Invalid item selection');
+    return;
+  }
+  
   this.savedItemList[index]={
     mode: "Pack",
     stockID: itemInfo.id,
@@ -1631,9 +1644,23 @@ saveItem(event, index) {
     subTotal: 0,
     preturn:0,
     isSelected:0,
+    //this is soumik code - added HSN field mapping
+    hsn: itemInfo.hsn || itemInfo.barcode || 0,
   };
 
+  //this is soumik code - clear itemList and blur input to close dropdown
+  this.itemList = [];
   this.itemScanBox = "";
+  
+  // Force blur the autocomplete input to close dropdown
+  setTimeout(() => {
+    const autoCompleteInputs = document.querySelectorAll('.p-autocomplete-input');
+    autoCompleteInputs.forEach(input => {
+      if (input) {
+        input.blur();
+      }
+    });
+  }, 100);
 }
 
 loadList() {
