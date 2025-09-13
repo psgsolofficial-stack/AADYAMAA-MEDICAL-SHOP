@@ -137,6 +137,11 @@ Route::post('delete_printer_receipt', [PrinterReceiptController::class, 'delete'
 //this is soumik code - back to auth:sanctum for user's machine compatibility
 Route::get('suppliers', [ExpiryReturnReportController::class, 'getSuppliers'])->middleware(['auth:sanctum']);
 Route::post('expiry_return_report', [ExpiryReturnReportController::class, 'getExpiryReturnReport'])->middleware(['auth:sanctum']);
+
+//this is soumik code - POS search items route for sale page
+Route::post('search_items', [PosController::class, 'searchItem'])->middleware(['auth:sanctum']);
+//this is soumik code - get batch variations for product selection
+Route::post('get_batch_variations', [PosController::class, 'getBatchVariations'])->middleware(['auth:sanctum']);
 //this is soumik code - new routes for edit and delete expiry return records
 Route::get('expiry_return/{id}', [ExpiryReturnReportController::class, 'getExpiryReturn'])->middleware(['auth:sanctum']);
 Route::post('update_expiry_return', [ExpiryReturnReportController::class, 'updateExpiryReturn'])->middleware(['auth:sanctum']);
@@ -165,6 +170,8 @@ Route::get('get_profilers/{id}', [ProfilerController::class, 'show'])->middlewar
 Route::post('edit_profilers', [ProfilerController::class,'update'])->middleware(['auth:sanctum','permission:Profilers']);
 Route::post('delete_profilers', [ProfilerController::class,'delete'])->middleware(['auth:sanctum','permission:Profilers']);
 Route::post('search_profilers', [ProfilerController::class,'searchProfile'])->middleware(['auth:sanctum','permission:Profilers']);
+// THIS IS SOUMIK CODE - Route for searching only suppliers
+Route::post('search_suppliers', [ProfilerController::class,'searchSuppliers'])->middleware('auth:sanctum');
 
 
 //Voucher ROUTES
@@ -219,7 +226,7 @@ Route::post('update_stock', [StockController::class, 'update'])->middleware(['au
 
 
 //POS
-Route::post('search_items', [StockController::class, 'searchItems'])->middleware('auth:sanctum');
+//this is soumik code - removed duplicate search_items route, using PosController instead
 //this is soumik code - new route for getting product variations
  Route::post('get_product_variations', [StockController::class, 'getProductVariations'])->middleware('auth:sanctum');
 Route::get('pos_initialization', [PosController::class, 'index'])->middleware(['auth:sanctum','permission:Orders']);

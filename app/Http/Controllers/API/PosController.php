@@ -1558,6 +1558,121 @@ class PosController extends Controller
         return $response;
     }
 
+    //this is soumik code - enhanced search for POS sale page with better matching
+    public function searchItem(Request $request)
+    {
+        $request->validate([
+            'keyword' => ['required', 'min:1']
+        ]);
+
+        $keyword = strtoupper(trim($request->keyword)); // Convert to uppercase for better matching
+        $branchId = Auth::user()->branch_id;
+
+        try {
+            // Search stocks with enhanced case-insensitive query
+            $stocks = Stock::select(
+                'id',
+                'product_name',
+                'generic',
+                'batch_no',
+                'qty',
+                'strip_size',
+                'pack_size',
+                'sale_price',
+                'mrp',
+                'expiry_date',
+                'barcode',
+                'tax_1',
+                'tax_2',
+                'tax_3',
+                'discount_percentage',
+                'purchase_price'
+            )
+            ->where('branch_id', $branchId)
+            ->where('status', 'Active')
+            ->where('qty', '>', 0)
+            ->where(function($query) use ($keyword) {
+                $query->whereRaw('UPPER(product_name) LIKE ?', ['%' . $keyword . '%'])
+                      ->orWhereRaw('UPPER(generic) LIKE ?', ['%' . $keyword . '%'])
+                      ->orWhere('barcode', 'LIKE', '%' . $keyword . '%')
+                      ->orWhereRaw('REPLACE(UPPER(product_name), " ", "") LIKE ?', ['%' . str_replace(' ', '', $keyword) . '%']);
+            })
+            ->orderByRaw('CASE WHEN UPPER(product_name) LIKE ? THEN 1 ELSE 2 END', [$keyword . '%'])
+            ->orderBy('product_name', 'ASC')
+            ->limit(50)
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'records' => $stocks,
+                'debug' => [
+                    'keyword' => $keyword,
+                    'branch_id' => $branchId,
+                    'count' => $stocks->count()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error searching items: ' . $e->getMessage(),
+                'records' => [],
+                'error' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    //this is soumik code - get batch variations for specific product
+    public function getBatchVariations(Request $request)
+    {
+        $request->validate([
+            'product_name' => ['required']
+        ]);
+
+        $productName = $request->product_name;
+        $branchId = Auth::user()->branch_id;
+
+        try {
+            // Get all batches for the selected product
+            $batches = Stock::select(
+                'id',
+                'product_name',
+                'generic',
+                'batch_no',
+                'qty',
+                'strip_size',
+                'pack_size',
+                'sale_price',
+                'mrp',
+                'expiry_date',
+                'purchase_price',
+                'tax_1',
+                'tax_2',
+                'tax_3',
+                'discount_percentage'
+            )
+            ->where('branch_id', $branchId)
+            ->where('status', 'Active')
+            ->where('qty', '>', 0)
+            ->whereRaw('UPPER(product_name) = ?', [strtoupper($productName)])
+            ->orderBy('expiry_date', 'DESC') // Latest expiry first
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'records' => $batches,
+                'product_name' => $productName
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error getting batch variations: ' . $e->getMessage(),
+                'records' => []
+            ], 500);
+        }
+    }
+
     public function getPosReceipt(Request $request)
     {
         $request->validate([

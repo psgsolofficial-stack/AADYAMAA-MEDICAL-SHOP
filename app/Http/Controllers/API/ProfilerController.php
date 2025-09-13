@@ -101,4 +101,25 @@ class ProfilerController extends Controller
 			'records' => $options
 		];
 	}
+
+	// THIS IS SOUMIK CODE - Search only suppliers for expiry report
+	public function searchSuppliers(Request $request)
+	{
+		$keyword = $request['keyword'];
+
+		$options = Profiler::where('status', 'Active')
+		->where('account_type', 'Supplier')
+		->where(function($query) use ($request) {
+			$query->where('contact_no','=',$request->keyword)
+				->orWhere('account_title','LIKE','%'.$request->keyword.'%')
+				->orWhere('email_address','LIKE','%'.$request->keyword.'%');
+		})
+		->limit(20)
+		->orderBy('id','DESC')
+		->get();
+		
+		return [
+			'records' => $options
+		];
+	}
 }

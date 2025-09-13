@@ -21,7 +21,7 @@ export default class PosService {
 		})
 	}
 
-	//this is soumik code - modified to search unique items first
+	//this is soumik code - enhanced search for POS sale page with instant response
 	searchItem(keyword) {
 		//SHOW LOADING
 		const store = useStore();
@@ -36,22 +36,40 @@ export default class PosService {
 				url: api,
 				data: formData,
 			}
-		).then(res => res.data)
-			.catch((e) => ExceptionHandling.HandleErrors(e))
+		).then(res => {
+			// Handle new API response format
+			if (res.data && res.data.success) {
+				return {
+					success: true,
+					records: res.data.records || []
+				};
+			} else {
+				return {
+					success: false,
+					records: []
+				};
+			}
+		})
+			.catch((e) => {
+				ExceptionHandling.HandleErrors(e);
+				return {
+					success: false,
+					records: []
+				};
+			})
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			})
 	}
 
-	//this is soumik code - new method to get product variations by base product name
-	getProductVariations(baseProductName, generic) {
+	//this is soumik code - get batch variations for specific product
+	getBatchVariations(productName) {
 		//SHOW LOADING
 		const store = useStore();
 		store.dispatch(ActionTypes.PROGRESS_BAR, true);
-		const api = '/api/get_product_variations';
+		const api = '/api/get_batch_variations';
 		const formData = new FormData();
-		formData.append('base_product_name', baseProductName);
-		formData.append('generic', generic);
+		formData.append('product_name', productName);
 
 		return instance()(
 			{
@@ -59,31 +77,27 @@ export default class PosService {
 				url: api,
 				data: formData,
 			}
-		).then(res => res.data)
-			.catch((e) => ExceptionHandling.HandleErrors(e))
-			.finally(() => {
-				store.dispatch(ActionTypes.PROGRESS_BAR, false);
-			})
-	}
-
-	//this is soumik code - new method to get product variations by base product name
-	getProductVariations(baseProductName, generic) {
-		//SHOW LOADING
-		const store = useStore();
-		store.dispatch(ActionTypes.PROGRESS_BAR, true);
-		const api = '/api/get_product_variations';
-		const formData = new FormData();
-		formData.append('base_product_name', baseProductName);
-		formData.append('generic', generic);
-
-		return instance()(
-			{
-				method: 'post',
-				url: api,
-				data: formData,
+		).then(res => {
+			// Handle API response
+			if (res.data && res.data.success) {
+				return {
+					success: true,
+					records: res.data.records || []
+				};
+			} else {
+				return {
+					success: false,
+					records: []
+				};
 			}
-		).then(res => res.data)
-			.catch((e) => ExceptionHandling.HandleErrors(e))
+		})
+			.catch((e) => {
+				ExceptionHandling.HandleErrors(e);
+				return {
+					success: false,
+					records: []
+				};
+			})
 			.finally(() => {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			})

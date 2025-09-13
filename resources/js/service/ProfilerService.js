@@ -138,4 +138,26 @@ export default class ProfilerService {
 				store.dispatch(ActionTypes.PROGRESS_BAR, false);
 			})
 	}
+
+	// THIS IS SOUMIK CODE - Search only suppliers for expiry report
+	searchSuppliers(keyword) {
+		//SHOW LOADING
+		const store = useStore();
+		store.dispatch(ActionTypes.PROGRESS_BAR, true);
+		const api = '/api/search_suppliers';
+		const formData = new FormData();
+		formData.append('keyword', keyword);
+
+		return instance()(
+			{
+				method: 'post',
+				url: api,
+				data: formData,
+			}
+		).then(res => res.data)
+			.catch((e) => ExceptionHandling.HandleErrors(e))
+			.finally(() => {
+				store.dispatch(ActionTypes.PROGRESS_BAR, false);
+			})
+	}
 }
