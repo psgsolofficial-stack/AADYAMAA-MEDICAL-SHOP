@@ -3,7 +3,7 @@
 # Dependencies
 node_modules/
 # vendor/ - removed as per sir's requirement for live deployment
-vendor
+vendor/
 
 # Environment files
 .env
